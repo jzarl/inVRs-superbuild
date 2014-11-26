@@ -76,7 +76,7 @@ ExternalProject_Add(
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensg"
 	GIT_REPOSITORY "git://git.code.sf.net/p/opensg/code"
 	INSTALL_DIR "${OpenSG_DIR}"
-	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}"
+	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}"
 	)
 # -> collada jpeg png freetype
 # -> boost
@@ -88,5 +88,5 @@ ExternalProject_Add(
 	DEPENDS OpenSG
 	SVN_REPOSITORY "https://svn.lrz.de/repos/inVRs/branches/inVRs_OSG"
 	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
-	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}"
+	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
 	)
