@@ -1,0 +1,2 @@
+This directory holds files that are downloaded by cmake.
+If you remove the build directory, cmake will look here first before attempting to download files.
