@@ -34,15 +34,15 @@ if( Boost_BUILD )
 
 	# windows-builds of boost need different compilation commands:
 	if( WIN32 )
+		# Windows boost does apperently not support out-of-tree builds:
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.bat)
-		set( BOOST_B2_COMMAND <SOURCE_DIR>/b2.exe install )
+		set( BOOST_B2_COMMAND <SOURCE_DIR>/b2.exe install "--build-dir=<SOURCE_DIR>" "--prefix=<INSTALL_DIR>")
 	else()
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.sh "--prefix=<INSTALL_DIR>" )
-		set( BOOST_B2_COMMAND <BINARY_DIR>/b2 install )
+		set( BOOST_B2_COMMAND <BINARY_DIR>/b2 install "--build-dir=<BINARY_DIR>" "--prefix=<INSTALL_DIR>" )
 	endif()
 
 	# assemble the complete b2 commandline:
-	list( APPEND BOOST_B2_COMMAND "--build-dir=<BINARY_DIR>" "--prefix=<INSTALL_DIR>" )
 	list( APPEND BOOST_B2_COMMAND "--layout=versioned" "--build-type=complete" )
 	foreach( component IN LISTS BOOST_REQUIRED_COMPONENTS )
 		list( APPEND BOOST_B2_COMMAND "--with-${component}" )
