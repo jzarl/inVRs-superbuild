@@ -35,7 +35,7 @@ if( Boost_BUILD )
 	# windows-builds of boost need different compilation commands:
 	if( WIN32 )
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.bat)
-		set( BOOST_B2_COMMAND <BINARY_DIR>/b2.exe install )
+		set( BOOST_B2_COMMAND <SOURCE_DIR>/b2.exe install )
 	else()
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.sh "--prefix=<INSTALL_DIR>" )
 		set( BOOST_B2_COMMAND <BINARY_DIR>/b2 install )
