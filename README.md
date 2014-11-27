@@ -31,21 +31,24 @@ To verify a working set of programs, you should be able to run ``cmake``, ``git`
 
  1. Open a developer console window
  2. Set some variable names (adjust as needed) and ensure that the build directory exists:
+
     ```
-	set SOURCEDIR=F:\inVRs-superbuild
-	set BUILDDIR=%SOURCEDIR%\build
-	mkdir %BUILDDIR%
-	```
-	You can of course omit this step and just fill in the appropriate path name in the following steps.
+    set SOURCEDIR=F:\inVRs-superbuild
+    set BUILDDIR=%SOURCEDIR%\build
+    mkdir %BUILDDIR%
+    ```
+    You can of course omit this step and just fill in the appropriate path name in the following steps.
  3. Run CMake:
+
     ```
-	cd %BUILDDIR&
-	cmake %SOURCEDIR%
-	```
+    cd %BUILDDIR&
+    cmake %SOURCEDIR%
+    ```
  4. *Variant A:* Build via CMake:
+    
     ```
-	cmake --build %BUILDDIR%
-	```
+    cmake --build %BUILDDIR%
+    ```
  5. *Variant B:* Build in Visual Studio:
     Open the Visual Studio Solution ``%BUILDDIR%\inVRs-superbuild.sln`` in Microsoft Visual Studio and build it.
 
