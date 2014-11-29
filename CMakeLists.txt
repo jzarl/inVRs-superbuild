@@ -20,6 +20,7 @@ set(DEFAULT_CMAKE_ARGS
 	)
 
 include( ExternalProject )
+include( "${CMAKE_CURRENT_SOURCE_DIR}/repositories.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/HelperFunctions.cmake" )
 
 ############################################################
@@ -53,8 +54,7 @@ if( Boost_BUILD )
 		Boost
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/boost"
 		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
-		URL "http://sourceforge.net/projects/boost/files/boost/1.56.0/boost_1_56_0.tar.bz2/download"
-		URL_HASH "MD5=a744cf167b05d72335f27c88115f211d"
+		${Boost_DOWNLOAD}
 		UPDATE_COMMAND "${BOOST_BOOTSTRAP_COMMAND}"
 		CONFIGURE_COMMAND ""
 		BUILD_COMMAND ""
@@ -74,7 +74,7 @@ ExternalProject_Add(
 	OpenSG
 	DEPENDS Boost
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensg"
-	GIT_REPOSITORY "git://git.code.sf.net/p/opensg/code"
+	${OpenSG_DOWNLOAD}
 	INSTALL_DIR "${OpenSG_DIR}"
 	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}"
 	)
@@ -86,7 +86,7 @@ ExternalProject_Add(
 ExternalProject_Add(
 	inVRs
 	DEPENDS OpenSG
-	SVN_REPOSITORY "https://svn.lrz.de/repos/inVRs/branches/inVRs_OSG"
+	${inVRs_DOWNLOAD}
 	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
 	)
