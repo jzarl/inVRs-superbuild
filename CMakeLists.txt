@@ -73,6 +73,10 @@ endif()
 
 ############################################################
 ### OpenSG
+# Build options for OpenSG:
+set( OpenSG_CMAKE_ARGS
+	"-DOSGCOMPAT_ENABLE:BOOL=ON" "-DOSGCOMPAT_ENABLE_DEPRECATED:BOOL=ON"
+	)
 # set OpenSG_DIR, so that find_package finds it:
 set( OpenSG_DIR "${CMAKE_INSTALL_PREFIX}" )
 ExternalProject_Add(
@@ -81,7 +85,7 @@ ExternalProject_Add(
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensg"
 	${OpenSG_DOWNLOAD}
 	INSTALL_DIR "${OpenSG_DIR}"
-	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}"
+	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" ${OpenSG_CMAKE_ARGS}
 	)
 # -> collada jpeg png freetype
 # -> boost
