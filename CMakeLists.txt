@@ -19,6 +19,11 @@ set(DEFAULT_CMAKE_ARGS
 	"-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
 	)
 
+# the default install prefix usually won't work because the external projects are installed
+if( "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local" )
+	message( WARNING "The install prefix ${CMAKE_INSTALL_PREFIX} is normally not writable." )
+endif()
+
 include( ExternalProject )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/repositories.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/HelperFunctions.cmake" )
