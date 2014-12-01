@@ -8,7 +8,7 @@
 ##   ExternalProject_Add( MyPackage ... )
 ## endif()
 function( conditional_find_package PKG )
-	set( USE_${PKG} auto CACHE STRING 
+	set( USE_${PKG} auto CACHE STRING
 	"Which ${PKG} should be used? 'system' to require an already installed version, 'internal' to force building it, 'auto' to try a system-wide installation and fall back to the internal version if none is found." )
 	set_property( CACHE USE_${PKG} PROPERTY STRINGS "auto" "system" "internal" )
 
