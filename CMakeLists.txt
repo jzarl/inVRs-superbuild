@@ -77,12 +77,15 @@ endif()
 ############################################################
 ### OpenSG
 message( STATUS "Building OpenSG from source..." )
+
+# set OpenSG_DIR, so that find_package finds it:
+set( OpenSG_DIR "${CMAKE_INSTALL_PREFIX}" )
+
 # Build options for OpenSG:
 set( OpenSG_CMAKE_ARGS
 	"-DOSGCOMPAT_ENABLE:BOOL=ON" "-DOSGCOMPAT_ENABLE_DEPRECATED:BOOL=ON"
 	)
-# set OpenSG_DIR, so that find_package finds it:
-set( OpenSG_DIR "${CMAKE_INSTALL_PREFIX}" )
+
 ExternalProject_Add(
 	OpenSG
 	DEPENDS Boost
@@ -91,6 +94,7 @@ ExternalProject_Add(
 	INSTALL_DIR "${OpenSG_DIR}"
 	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" ${OpenSG_CMAKE_ARGS}
 	)
+
 # -> collada jpeg png freetype
 # -> boost
 
