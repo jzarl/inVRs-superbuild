@@ -15,7 +15,7 @@ set( DOWNLOAD_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/download" CACHE PATH 
 mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
 
 set(DEFAULT_CMAKE_ARGS
-	"-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>"
+	"-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}"
 	"-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
 	)
 
@@ -35,6 +35,7 @@ set( BOOST_REQUIRED_COMPONENTS system filesystem )
 conditional_find_package( Boost COMPONENTS ${BOOST_REQUIRED_COMPONENTS} )
 
 if( Boost_BUILD )
+	message( STATUS "Building Boost from source..." )
 	# set BOOST_ROOT, so that find_package finds this boost, later:
 	set( BOOST_ROOT "${CMAKE_INSTALL_PREFIX}" )
 
@@ -43,6 +44,7 @@ if( Boost_BUILD )
 		# Windows boost does apperently not support out-of-tree builds:
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.bat)
 		set( BOOST_B2_COMMAND <SOURCE_DIR>/b2.exe install "--build-dir=<SOURCE_DIR>" "--prefix=<INSTALL_DIR>")
+		set( BOOST_BUILD_IN_SOURCE BUILD_IN_SOURCE 1 )
 	else()
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.sh "--prefix=<INSTALL_DIR>" )
 		set( BOOST_B2_COMMAND <BINARY_DIR>/b2 install "--build-dir=<BINARY_DIR>" "--prefix=<INSTALL_DIR>" )
@@ -59,6 +61,7 @@ if( Boost_BUILD )
 		Boost
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/boost"
 		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		${BOOST_BUILD_IN_SOURCE}
 		${Boost_DOWNLOAD}
 		UPDATE_COMMAND "${BOOST_BOOTSTRAP_COMMAND}"
 		CONFIGURE_COMMAND ""
@@ -73,6 +76,7 @@ endif()
 
 ############################################################
 ### OpenSG
+message( STATUS "Building OpenSG from source..." )
 # Build options for OpenSG:
 set( OpenSG_CMAKE_ARGS
 	"-DOSGCOMPAT_ENABLE:BOOL=ON" "-DOSGCOMPAT_ENABLE_DEPRECATED:BOOL=ON"
