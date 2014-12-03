@@ -15,10 +15,11 @@ set( FreeGLUT_DOWNLOAD
 	URL "http://downloads.sourceforge.net/project/freeglut/freeglut/3.0.0%20Release%20Candidate%201/freeglut-3.0.0-rc1.tar.gz"
 	URL_HASH "MD5=9679f19e5d9fd211c904698be0cfec2b"
 	)
-	
+
+# Homepage: http://glew.sourceforge.net/
 set( GLEW_DOWNLOAD
-	URL "http://downloads.sourceforge.net/project/glew/glew/1.11.0/glew-1.11.0-win32.zip"
-	URL_HASH "MD5=ebcebc61bfa1879ece139b7acc4b2734"
+	URL "http://downloads.sourceforge.net/project/glew/glew/1.11.0/glew-1.11.0.zip"
+	URL_HASH "MD5=a36ecf091ae4887fb980ca943c75b1ce"
 	)
 
 set( inVRs_DOWNLOAD
