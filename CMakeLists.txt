@@ -11,14 +11,12 @@ mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
 
 set( DEFAULT_CMAKE_ARGS	"-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}" )
 
-# PNG only supports Release and Debug builds:
-set( SUPPORTED_BUILD_TYPES Release Debug )
 if ( CMAKE_CONFIGURATION_TYPES )
 	# multi-configuration generators
-	set( CMAKE_CONFIGURATION_TYPES "${SUPPORTED_BUILD_TYPES}" )
+	#set( CMAKE_CONFIGURATION_TYPES Release Debug RelWithDebInfo )
 else()
 	# single-configuration generators
-	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "${SUPPORTED_BUILD_TYPES}" )
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Release Debug RelWithDebInfo )
 	list( APPEND DEFAULT_CMAKE_ARGS	"-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}" )
 endif()
 
@@ -111,6 +109,7 @@ if( GLUT_BUILD )
 			# .pdb files are not generated in MSVC 2013:
 			"-DINSTALL_PDB:BOOL=OFF"
 		)
+	copy_install_manifest( FreeGLUT "${CMAKE_CURRENT_BINARY_DIR}/external/FreeGLUT/src/FreeGLUT-build/install_manifest.txt")
 	list( APPEND OpenSG_DEPS FreeGLUT )
 else()
 	# create pseudo-target for ExternalProject_Add depends:
@@ -136,6 +135,7 @@ if( ZLIB_BUILD )
 			"${DEFAULT_CMAKE_ARGS}"
 		)
 	list( APPEND OpenSG_DEPS ZLIB )
+	copy_install_manifest( ZLIB "${CMAKE_CURRENT_BINARY_DIR}/external/ZLIB/src/ZLIB-build/install_manifest.txt")
 else()
 	# create pseudo-target for ExternalProject_Add depends:
 	add_custom_target( ZLIB )
@@ -166,6 +166,7 @@ if( PCRE_BUILD )
 			"-DPCRE_SUPPORT_UTF:BOOL=ON"
 		)
 	list( APPEND OpenSG_DEPS PCRE )
+	copy_install_manifest( PCRE "${CMAKE_CURRENT_BINARY_DIR}/external/PCRE/src/PCRE-build/install_manifest.txt")
 else()
 	# create pseudo-target for ExternalProject_Add depends:
 	add_custom_target( PCRE )
@@ -189,6 +190,7 @@ if( PNG_BUILD )
 			"${DEFAULT_CMAKE_ARGS}"
 		)
 	list( APPEND OpenSG_DEPS PNG )
+	copy_install_manifest( PNG "${CMAKE_CURRENT_BINARY_DIR}/external/PNG/src/PNG-build/install_manifest.txt" )
 else()
 	# create pseudo-target for ExternalProject_Add depends:
 	add_custom_target( PNG )
@@ -260,6 +262,7 @@ ExternalProject_Add(
 		${OpenSG_CMAKE_ARGS}
 	STEP_TARGETS patch configure
 	)
+copy_install_manifest( OpenSG "${CMAKE_CURRENT_BINARY_DIR}/external/opensg/src/OpenSG-build/install_manifest.txt")
 
 ExternalProject_Add(
 	OpenSGSupport
@@ -272,6 +275,7 @@ ExternalProject_Add(
 		"${DEFAULT_CMAKE_ARGS}"
 		${OpenSGSupport_CMAKE_ARGS}
 	)
+copy_install_manifest( OpenSGSupport "${CMAKE_CURRENT_BINARY_DIR}/external/opensgsupport/src/OpenSGSupport-build/install_manifest.txt" )
 
 add_dependencies( OpenSG-configure OpenSGSupport )
 # -> jpeg freetype
@@ -285,3 +289,4 @@ ExternalProject_Add(
 	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
 	)
+copy_install_manifest( inVRs "${CMAKE_CURRENT_BINARY_DIR}/inVRs-prefix/src/inVRs-build/install_manifest.txt")
