@@ -57,7 +57,7 @@ function( copy_install_manifest name manifest_file)
 	ExternalProject_Add_Step(
 		${name} copy_install_manifest
 		DEPENDEES install
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${manifest_file} ${inVRs-SuperBuild_BINARY_DIR}/install_manifest_${name}
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${manifest_file} ${inVRs-SuperBuild_BINARY_DIR}/install_manifest_${name}.txt
 		)
 	create_uninstall_target( ${name} )
 endfunction()
