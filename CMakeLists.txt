@@ -31,6 +31,7 @@ include( ExternalProject )
 include( FindPkgConfig )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/repositories.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/HelperFunctions.cmake" )
+include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/UninstallTarget.cmake" )
 
 ############################################################
 ### Boost
@@ -264,6 +265,7 @@ ExternalProject_Add(
 	OpenSGSupport
 	DEPENDS OpenSG-patch ${OpenSGSupport_DEPS}
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensgsupport"
+	DOWNLOAD_COMMAND ""
 	INSTALL_DIR "${OpenSG_DIR}"
 	SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/opensg/src/OpenSG/Support"
 	CMAKE_ARGS
