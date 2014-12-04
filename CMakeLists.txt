@@ -9,10 +9,18 @@ set( CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
 set( DOWNLOAD_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/download" CACHE PATH "Cache directory for downloaded files." )
 mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
 
-set( DEFAULT_CMAKE_ARGS
-	"-DCMAKE_INSTALL_PREFIX:PATH=$<INSTALL_PREFIX>"
-	"-DCMAKE_BUILD_TYPE:STRING=$<CONFIG>"
-	)
+set( DEFAULT_CMAKE_ARGS	"-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}" )
+
+# PNG only supports Release and Debug builds:
+set( SUPPORTED_BUILD_TYPES Release Debug )
+if ( CMAKE_CONFIGURATION_TYPES )
+	# multi-configuration generators
+	set( CMAKE_CONFIGURATION_TYPES "${SUPPORTED_BUILD_TYPES}" )
+else()
+	# single-configuration generators
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "${SUPPORTED_BUILD_TYPES}" )
+	list( APPEND DEFAULT_CMAKE_ARGS	"-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}" )
+endif()
 
 # the default install prefix usually won't work because the external projects are installed during build time
 if( "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local" )
