@@ -35,7 +35,7 @@ function( create_uninstall_target name )
 	if( NOT "${ARGN}" MATCHES "QUIET" )
 		message( STATUS "Creating uninstall target ${PROJECT_NAME}/${name}." )
 	endif()
-	
+
 	get_target_property( PROTO_FILE uninstall UT_PROTO_FILE )
 	set( MANIFEST_SUFFIX "_${name}" )
 
