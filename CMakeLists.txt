@@ -8,6 +8,8 @@ set( CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
 
 set( DOWNLOAD_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/download" CACHE PATH "Cache directory for downloaded files." )
 mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
+set( VCS_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vcs" CACHE PATH "Cache directory for external source code under version control" )
+mark_as_advanced( VCS_CACHE_DIRECTORY )
 
 set( DEFAULT_CMAKE_ARGS	"-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}" )
 
@@ -255,6 +257,7 @@ ExternalProject_Add(
 	OpenSG
 	DEPENDS ${OpenSG_DEPS}
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensg"
+	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/OpenSG"
 	INSTALL_DIR "${OpenSG_DIR}"
 	${OpenSG_DOWNLOAD}
 	CMAKE_ARGS
@@ -270,7 +273,7 @@ ExternalProject_Add(
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensgsupport"
 	DOWNLOAD_COMMAND ""
 	INSTALL_DIR "${OpenSG_DIR}"
-	SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/external/opensg/src/OpenSG/Support"
+	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/OpenSG/Support"
 	CMAKE_ARGS
 		"${DEFAULT_CMAKE_ARGS}"
 		${OpenSGSupport_CMAKE_ARGS}
@@ -285,6 +288,8 @@ add_dependencies( OpenSG-configure OpenSGSupport )
 ExternalProject_Add(
 	inVRs
 	DEPENDS OpenSG
+	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/inVRs"
+	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/inVRs"
 	${inVRs_DOWNLOAD}
 	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
