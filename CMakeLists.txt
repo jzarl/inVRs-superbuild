@@ -11,7 +11,10 @@ mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
 set( VCS_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vcs" CACHE PATH "Cache directory for external source code under version control" )
 mark_as_advanced( VCS_CACHE_DIRECTORY )
 
-set( DEFAULT_CMAKE_ARGS	"-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}" )
+set( DEFAULT_CMAKE_ARGS
+	"-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}"
+	"-DCMAKE_PREFIX_PATH:PATH=${CMAKE_PREFIX_PATH}"
+	)
 
 if ( CMAKE_CONFIGURATION_TYPES )
 	# multi-configuration generators
