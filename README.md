@@ -17,7 +17,7 @@ Make sure you have the following programs installed:
 
  - CMake (from http://www.cmake.org/download/)
  - git (e.g. from http://msysgit.github.io)
- - Subversion (e.g. from http://silksvn.com/download)
+ - Subversion (e.g. from https://sliksvn.com/download/)
  - A working C++ compiler (e.g. Microsoft Visual C++ Express)
 
 To verify a working set of programs, you should be able to run ``cmake``, ``git``, and ``svn`` from a console window:
