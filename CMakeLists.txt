@@ -4,7 +4,7 @@ project( inVRs-SuperBuild )
 ############################################################
 ### Boilerplate code
 
-set( CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
+list( APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
 
 set( DOWNLOAD_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/download" CACHE PATH "Cache directory for downloaded files." )
 mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
@@ -254,6 +254,7 @@ set( OpenSG_DIR "${CMAKE_INSTALL_PREFIX}" )
 list( APPEND OpenSG_CMAKE_ARGS
 	"-DOSG_USE_OSGSUPPORT_LIBS:BOOL=ON"
 	"-DOSGCOMPAT_ENABLE:BOOL=ON" "-DOSGCOMPAT_ENABLE_DEPRECATED:BOOL=ON"
+	"-DOSGBUILD_TESTS:BOOL=OFF"
 	)
 
 ExternalProject_Add(

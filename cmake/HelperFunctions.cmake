@@ -8,6 +8,10 @@
 ##   ExternalProject_Add( MyPackage ... )
 ## endif()
 function( conditional_find_package PKG )
+	# ignore the package, if it's installed in the install prefix
+	# this allows for recompilation using another build type:
+	list( REMOVE_ITEM CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
+
 	set( USE_${PKG} auto CACHE STRING
 	"Which ${PKG} should be used? 'system' to require an already installed version, 'internal' to force building it, 'auto' to try a system-wide installation and fall back to the internal version if none is found." )
 	set_property( CACHE USE_${PKG} PROPERTY STRINGS "auto" "system" "internal" )
@@ -21,7 +25,7 @@ function( conditional_find_package PKG )
 		set( _REQUIRED "REQUIRED" )
 	endif()
 
-	find_package( ${PKG} ${ARGN} ${_REQUIRED} )
+	find_package( ${PKG} ${ARGN} ${_REQUIRED} QUIET NO_CMAKE_PACKAGE_REGISTRY )
 	if( ${PKG}_FOUND )
 		set( ${PKG}_BUILD false PARENT_SCOPE)
 	else()
@@ -32,6 +36,10 @@ endfunction()
 ## Just like conditional_find_package, but using pkg-config.
 ## Usage is just like pkg_check_modules
 function( conditional_pkg_check_modules PKG )
+	# ignore the package, if it's installed in the install prefix
+	# this allows for recompilation using another build type:
+	list( REMOVE_ITEM CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
+
 	set( USE_${PKG} auto CACHE STRING
 	"Which ${PKG} should be used? 'system' to require an already installed version, 'internal' to force building it, 'auto' to try a system-wide installation and fall back to the internal version if none is found." )
 	set_property( CACHE USE_${PKG} PROPERTY STRINGS "auto" "system" "internal" )
