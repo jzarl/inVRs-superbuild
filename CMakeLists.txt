@@ -6,6 +6,11 @@ project( inVRs-SuperBuild )
 
 list( APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
 
+option( DISABLE_VCS_UPDATES "Do not try to update repositories under VCS (Use this if you don't have a network connection)" OFF )
+if ( DISABLE_VCS_UPDATES )
+	message( WARNING "Subversion and git repository updates are disabled!" )
+	set( MAYBE_DISABLE_UPDATE_COMMAND UPDATE_COMMAND ${CMAKE_COMMAND} -E echo "NOT updating repository" )
+endif()
 set( DOWNLOAD_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/download" CACHE PATH "Cache directory for downloaded files." )
 mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
 set( VCS_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vcs" CACHE PATH "Cache directory for external source code under version control" )
@@ -25,7 +30,8 @@ else()
 	list( APPEND DEFAULT_CMAKE_ARGS	"-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}" )
 endif()
 
-# the default install prefix usually won't work because the external projects are installed during build time
+# the default install prefix usually won't work on Linux because the external projects are installed during build time
+# (and we don't want to build as root)
 if( "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local" )
 	message( WARNING "The install prefix ${CMAKE_INSTALL_PREFIX} is normally not writable." )
 endif()
@@ -264,6 +270,7 @@ ExternalProject_Add(
 	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/OpenSG"
 	INSTALL_DIR "${OpenSG_DIR}"
 	${OpenSG_DOWNLOAD}
+	${MAYBE_DISABLE_UPDATE_COMMAND}
 	CMAKE_ARGS
 		"${DEFAULT_CMAKE_ARGS}"
 		${OpenSG_CMAKE_ARGS}
@@ -295,6 +302,7 @@ ExternalProject_Add(
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/inVRs"
 	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/inVRs"
 	${inVRs_DOWNLOAD}
+	${MAYBE_DISABLE_UPDATE_COMMAND}
 	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
 	)
