@@ -1,11 +1,12 @@
-if(NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
-	message(FATAL_ERROR "Cannot find install manifest: @CMAKE_CURRENT_BINARY_DIR@/install_manifest@MANIFEST_SUFFIX@.txt")
+set(MANIFEST_FILE "@PROJECT_BINARY_DIR@/install_manifest@MANIFEST_SUFFIX@.txt")
+if(NOT EXISTS "${MANIFEST_FILE}")
+	message(FATAL_ERROR "Cannot find install manifest: ${MANIFEST_FILE}")
 endif()
 
-file(READ "@{PROJECT_BINARY_DIR@/install_manifest@MANIFEST_SUFFIX@.txt" files)
+file(READ "${MANIFEST_FILE}" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 
-foreach(file IN LIST files)
+foreach(file IN LISTS files)
 	message(STATUS "Uninstalling $ENV{DESTDIR}${file}")
 	if(IS_SYMLINK "$ENV{DESTDIR}${file}" OR EXISTS "$ENV{DESTDIR}${file}")
 		exec_program(
