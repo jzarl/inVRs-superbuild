@@ -230,44 +230,19 @@ endif()
 
 
 ############################################################
-### OpenSG Support libs
-# Some libraries don't (yet) support CMake as build system.
-# OpenSGSupport has build instructions for those libraries.
-# In some cases, newer versions of a library support cmake;
-# in these cases, we use the built-in build system instead.
+# OpenSG dependencies:
 
-# since these all follow the same pattern, define a function:
-function( OSGSupport_Add_Download name varname )
-	ExternalProject_Add( ${name}
-		${${name}_DOWNLOAD}
-		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensgsupport"
-		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
-		UPDATE_COMMAND ""
-		PATCH_COMMAND ""
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-		INSTALL_COMMAND ""
-		TEST_COMMAND ""
-	)
+# TODO: ( ColladaDOM OSGColladaSrcDir )
+#   ColladaDOM supports CMake, but its dependency LibXML2 doesn't
+#   ColladaDOM depends on LibXML2 PCRE
+# OK: ( FreeGLUT OSGFreeGlutSrcDir )
+# OK: ( GLEW OSGGLEWSrcDir )
+# TODO: ( JPEG OSGJpegLibSrcDir )
+# TODO: ( LibXML2 OSGLibXml2SrcDir )
+# TODO: ( PCRE OSGPcreSrcDir )
+# ??: ( PNG OSGLibPNGSrcDir )
+# OK: ( ZLIB OSGZLibSrcDir )
 
-	list( APPEND OpenSGSupport_DEPS ${name} )
-	list( APPEND OpenSGSupport_CMAKE_ARGS "-D${varname}:PATH=${CMAKE_CURRENT_BINARY_DIR}/external/opensgsupport/src/${name}" )
-	# export variables:
-	set( OpenSGSupport_DEPS "${OpenSGSupport_DEPS}" PARENT_SCOPE )
-	set( OpenSGSupport_CMAKE_ARGS "${OpenSGSupport_CMAKE_ARGS}" PARENT_SCOPE )
-endfunction()
-
-# ColladaDOM supports CMake, but its dependency LibXML2 doesn't:
-#OSGSupport_Add_Download( ColladaDOM OSGColladaSrcDir )
-#OSGSupport_Add_Download( FreeGLUT OSGFreeGlutSrcDir )
-#OSGSupport_Add_Download( GLEW OSGGLEWSrcDir )
-#OSGSupport_Add_Download( JPEG OSGJpegLibSrcDir )
-#OSGSupport_Add_Download( LibXML2 OSGLibXml2SrcDir )
-#OSGSupport_Add_Download( PCRE OSGPcreSrcDir )
-#OSGSupport_Add_Download( PNG OSGLibPNGSrcDir )
-#OSGSupport_Add_Download( ZLIB OSGZLibSrcDir )
-
-#add_dependencies( ColladaDOM LibXML2 PCRE )
 
 ############################################################
 ### OpenSG
@@ -285,7 +260,7 @@ list( APPEND OpenSG_CMAKE_ARGS
 ExternalProject_Add(
 	OpenSG
 	DEPENDS Boost FreeGLUT GLEW PNG ZLIB
-	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensg"
+	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/OpenSG"
 	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/OpenSG"
 	INSTALL_DIR "${OpenSG_DIR}"
 	${OpenSG_DOWNLOAD}
@@ -294,7 +269,7 @@ ExternalProject_Add(
 		"${DEFAULT_CMAKE_ARGS}"
 		${OpenSG_CMAKE_ARGS}
 	)
-copy_install_manifest( OpenSG "${CMAKE_CURRENT_BINARY_DIR}/external/opensg/src/OpenSG-build/install_manifest.txt")
+copy_install_manifest( OpenSG "${CMAKE_CURRENT_BINARY_DIR}/external/OpenSG/src/OpenSG-build/install_manifest.txt")
 
 # -> jpeg freetype
 
