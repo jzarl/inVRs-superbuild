@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.1 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.0 FATAL_ERROR )
 project( inVRs-SuperBuild )
 
 ############################################################
@@ -58,10 +58,9 @@ if( Boost_BUILD )
 		# Windows boost does apperently not support out-of-tree builds:
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.bat )
 		set( BOOST_B2_COMMAND <SOURCE_DIR>/b2.exe install "--build-dir=<SOURCE_DIR>" "--prefix=<INSTALL_DIR>" )
-		set( BOOST_BUILD_IN_SOURCE BUILD_IN_SOURCE 1 )
 	else()
 		set( BOOST_BOOTSTRAP_COMMAND <SOURCE_DIR>/bootstrap.sh "--prefix=<INSTALL_DIR>" )
-		set( BOOST_B2_COMMAND <BINARY_DIR>/b2 install "--build-dir=<BINARY_DIR>" "--prefix=<INSTALL_DIR>" )
+		set( BOOST_B2_COMMAND <SOURCE_DIR>/b2 install "--build-dir=<SOURCE_DIR>" "--prefix=<INSTALL_DIR>" )
 	endif()
 
 	# assemble the complete b2 commandline:
@@ -74,7 +73,7 @@ if( Boost_BUILD )
 		Boost
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/boost"
 		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
-		${BOOST_BUILD_IN_SOURCE}
+		BUILD_IN_SOURCE 1
 		${Boost_DOWNLOAD}
 		UPDATE_COMMAND "${BOOST_BOOTSTRAP_COMMAND}"
 		CONFIGURE_COMMAND ""
