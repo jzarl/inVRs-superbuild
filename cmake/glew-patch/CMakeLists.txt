@@ -86,11 +86,20 @@ target_link_libraries( visualinfo glew )
 install(
 	TARGETS
 		glew glewstatic glewmx glewmxstatic
-		glewinfo visualinfo
 	EXPORT GLEWTargets
-	RUNTIME DESTINATION bin
+	RUNTIME DESTINATION lib
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
+	INCLUDES DESTINATION include/GL
+	)
+if( WIN32 )
+	# install the dll alongside the executables
+	set( GLEW_dll glew )
+endif()
+install(
+	TARGETS
+		glewinfo visualinfo ${GLEW_dll}
+	RUNTIME DESTINATION bin
 	)
 install(
 	FILES ${GLEW_HEADERS}

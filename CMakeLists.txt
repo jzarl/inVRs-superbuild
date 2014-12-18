@@ -48,8 +48,6 @@ set( BOOST_REQUIRED_COMPONENTS system filesystem )
 # try already installed version first:
 conditional_find_package( Boost COMPONENTS ${BOOST_REQUIRED_COMPONENTS} )
 
-list( APPEND OpenSG_DEPS Boost )
-
 if( Boost_BUILD )
 	message( STATUS "Building Boost from source..." )
 	# set BOOST_ROOT, so that find_package finds this boost, later:
@@ -121,7 +119,6 @@ if( GLUT_BUILD )
 			"-DINSTALL_PDB:BOOL=OFF"
 		)
 	copy_install_manifest( FreeGLUT "${CMAKE_CURRENT_BINARY_DIR}/external/FreeGLUT/src/FreeGLUT-build/install_manifest.txt")
-	list( APPEND OpenSG_DEPS FreeGLUT )
 else()
 	# create pseudo-target for ExternalProject_Add depends:
 	add_custom_target( FreeGLUT )
@@ -145,7 +142,6 @@ if( ZLIB_BUILD )
 		CMAKE_ARGS
 			"${DEFAULT_CMAKE_ARGS}"
 		)
-	list( APPEND OpenSG_DEPS ZLIB )
 	copy_install_manifest( ZLIB "${CMAKE_CURRENT_BINARY_DIR}/external/ZLIB/src/ZLIB-build/install_manifest.txt")
 else()
 	# create pseudo-target for ExternalProject_Add depends:
@@ -156,7 +152,7 @@ endif()
 
 ############################################################
 ### PCRE
-# project PCRE in OSGSupport is outdated, and FreeGLUT now supports cmake:
+# project PCRE in OSGSupport is outdated, and PCRE now supports cmake:
 
 conditional_pkg_check_modules( PCRE libpcrecpp )
 if( PCRE_BUILD )
@@ -176,7 +172,6 @@ if( PCRE_BUILD )
 			"-DPCRE_SUPPORT_JIT:BOOL=ON"
 			"-DPCRE_SUPPORT_UTF:BOOL=ON"
 		)
-	list( APPEND OpenSG_DEPS PCRE )
 	copy_install_manifest( PCRE "${CMAKE_CURRENT_BINARY_DIR}/external/PCRE/src/PCRE-build/install_manifest.txt")
 else()
 	# create pseudo-target for ExternalProject_Add depends:
@@ -193,6 +188,7 @@ if( PNG_BUILD )
 	set( PNG_DIR "${CMAKE_INSTALL_PREFIX}" )
 	ExternalProject_Add(
 		PNG
+		DEPENDS ZLIB
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/PNG"
 		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
 		INSTALL_DIR "${PNG_DIR}"
@@ -200,12 +196,36 @@ if( PNG_BUILD )
 		CMAKE_ARGS
 			"${DEFAULT_CMAKE_ARGS}"
 		)
-	list( APPEND OpenSG_DEPS PNG )
 	copy_install_manifest( PNG "${CMAKE_CURRENT_BINARY_DIR}/external/PNG/src/PNG-build/install_manifest.txt" )
 else()
 	# create pseudo-target for ExternalProject_Add depends:
 	add_custom_target( PNG )
 	message( STATUS "Using already installed PNG." )
+endif()
+
+
+############################################################
+### GLEW
+
+conditional_find_package( GLEW )
+if( GLEW_BUILD )
+	message( STATUS "Building GLEW from source." )
+	set( GLEW_DIR "${CMAKE_INSTALL_PREFIX}" )
+	ExternalProject_Add(
+		GLEW
+		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/GLEW"
+		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		INSTALL_DIR "${GLEW_DIR}"
+		${GLEW_DOWNLOAD}
+		PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/cmake/glew-patch/" <SOURCE_DIR>
+		CMAKE_ARGS
+			"${DEFAULT_CMAKE_ARGS}"
+		)
+	copy_install_manifest( GLEW "${CMAKE_CURRENT_BINARY_DIR}/external/GLEW/src/GLEW-build/install_manifest.txt" )
+else()
+	# create pseudo-target for ExternalProject_Add depends:
+	add_custom_target( GLEW )
+	message( STATUS "Using already installed GLEW." )
 endif()
 
 
@@ -238,16 +258,16 @@ function( OSGSupport_Add_Download name varname )
 endfunction()
 
 # ColladaDOM supports CMake, but its dependency LibXML2 doesn't:
-OSGSupport_Add_Download( ColladaDOM OSGColladaSrcDir )
+#OSGSupport_Add_Download( ColladaDOM OSGColladaSrcDir )
 #OSGSupport_Add_Download( FreeGLUT OSGFreeGlutSrcDir )
-OSGSupport_Add_Download( GLEW OSGGLEWSrcDir )
-OSGSupport_Add_Download( JPEG OSGJpegLibSrcDir )
-OSGSupport_Add_Download( LibXML2 OSGLibXml2SrcDir )
+#OSGSupport_Add_Download( GLEW OSGGLEWSrcDir )
+#OSGSupport_Add_Download( JPEG OSGJpegLibSrcDir )
+#OSGSupport_Add_Download( LibXML2 OSGLibXml2SrcDir )
 #OSGSupport_Add_Download( PCRE OSGPcreSrcDir )
 #OSGSupport_Add_Download( PNG OSGLibPNGSrcDir )
 #OSGSupport_Add_Download( ZLIB OSGZLibSrcDir )
 
-add_dependencies( ColladaDOM LibXML2 PCRE )
+#add_dependencies( ColladaDOM LibXML2 PCRE )
 
 ############################################################
 ### OpenSG
@@ -258,14 +278,13 @@ set( OpenSG_DIR "${CMAKE_INSTALL_PREFIX}" )
 
 # Build options for OpenSG:
 list( APPEND OpenSG_CMAKE_ARGS
-	"-DOSG_USE_OSGSUPPORT_LIBS:BOOL=ON"
 	"-DOSGCOMPAT_ENABLE:BOOL=ON" "-DOSGCOMPAT_ENABLE_DEPRECATED:BOOL=ON"
 	"-DOSGBUILD_TESTS:BOOL=OFF"
 	)
 
 ExternalProject_Add(
 	OpenSG
-	DEPENDS ${OpenSG_DEPS}
+	DEPENDS Boost FreeGLUT GLEW PNG ZLIB
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensg"
 	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/OpenSG"
 	INSTALL_DIR "${OpenSG_DIR}"
@@ -274,24 +293,9 @@ ExternalProject_Add(
 	CMAKE_ARGS
 		"${DEFAULT_CMAKE_ARGS}"
 		${OpenSG_CMAKE_ARGS}
-	STEP_TARGETS patch configure
 	)
 copy_install_manifest( OpenSG "${CMAKE_CURRENT_BINARY_DIR}/external/opensg/src/OpenSG-build/install_manifest.txt")
 
-ExternalProject_Add(
-	OpenSGSupport
-	DEPENDS OpenSG-patch ${OpenSGSupport_DEPS}
-	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/opensgsupport"
-	DOWNLOAD_COMMAND ""
-	INSTALL_DIR "${OpenSG_DIR}"
-	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/OpenSG/Support"
-	CMAKE_ARGS
-		"${DEFAULT_CMAKE_ARGS}"
-		${OpenSGSupport_CMAKE_ARGS}
-	)
-copy_install_manifest( OpenSGSupport "${CMAKE_CURRENT_BINARY_DIR}/external/opensgsupport/src/OpenSGSupport-build/install_manifest.txt" )
-
-add_dependencies( OpenSG-configure OpenSGSupport )
 # -> jpeg freetype
 
 ############################################################
