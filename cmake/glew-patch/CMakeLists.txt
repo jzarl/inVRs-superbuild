@@ -23,11 +23,17 @@ if( WIN32 )
 	if( MSVC )
 		set( CMAKE_DEBUG_POSTFIX "d" )
 	endif()
-	function(fix_archive_name target name)
+	function(fix_library_name target)
+		# windows uses lowercase names:
+		string( TOLOWER "${target}" name )
+		# windows 32bit has a is named "glew32":
+		string( REPLACE "glew" "glew32" name "${name}" )
+		set_property( TARGET ${target} PROPERTY ARCHIVE_OUTPUT_NAME ${name} )
 	endfunction()
 else()
-	# used to have "libGLEW.a" instead of "libGLEWstatic.a" on Unix:
-	function(fix_archive_name target name)
+	function(fix_library_name target )
+		# name static libs e.g. "libGLEW.a" instead of "libGLEWstatic.a":
+		string( REPLACE "static" "" name "${target}" )
 		set_property( TARGET ${target} PROPERTY ARCHIVE_OUTPUT_NAME ${name} )
 	endfunction()
 endif()
@@ -47,7 +53,7 @@ set_property( TARGET GLEW-gl PROPERTY INTERFACE_LINK_LIBRARIES ${OPENGL_gl_LIBRA
 # pkg-config:
 set( GLEW_REQUIRES "${GLEW_REQUIRES} gl" )
 
-option( GLEW_USE_GLU "Build against GLU" ON)
+option( GLEW_USE_GLU "Build against GLU" OFF)
 add_library( GLEW-glu INTERFACE IMPORTED)
 add_library( GLEW-glustatic INTERFACE IMPORTED)
 if( GLEW_USE_GLU )
@@ -88,6 +94,7 @@ endif()
 ### Define GLEW targets
 
 add_library( GLEW SHARED ${GLEW_SOURCES} )
+fix_library_name( GLEW )
 if( WIN32 )
 	# copied from OSGSupport:
 	target_compile_definitions( GLEW PRIVATE _WINDLL )
@@ -96,16 +103,17 @@ target_compile_definitions( GLEW PRIVATE GLEW_BUILD )
 target_link_libraries( GLEW PUBLIC GLEW-gl GLEW-glu ${X11-target} )
 
 add_library( GLEWstatic STATIC ${GLEW_SOURCES} )
-fix_archive_name( GLEWstatic GLEW )
+fix_library_name( GLEWstatic )
 target_compile_definitions( GLEWstatic PRIVATE GLEW_STATIC GLEW_BUILD )
 target_link_libraries( GLEWstatic PUBLIC GLEW-gl GLEW-glustatic ${X11-target} )
 
 add_library( GLEWmx SHARED ${GLEW_SOURCES} )
+fix_library_name( GLEWmx )
 target_compile_definitions( GLEWmx PUBLIC GLEW_MX PRIVATE GLEW_BUILD)
 target_link_libraries( GLEWmx PUBLIC GLEW-gl GLEW-glu ${X11-target} )
 
 add_library( GLEWmxstatic STATIC ${GLEW_SOURCES} )
-fix_archive_name( GLEWmxstatic GLEWmx )
+fix_library_name( GLEWmxstatic )
 target_compile_definitions( GLEWmxstatic PUBLIC GLEW_MX PRIVATE GLEW_STATIC GLEW_BUILD )
 target_link_libraries( GLEWmxstatic PUBLIC GLEW-gl GLEW-glustatic ${X11-target} )
 
@@ -149,7 +157,8 @@ if( NOT WIN32)
 	# set the variables for the .pc file:
 	function( create_pkgconfig libname )
 		set( infile "${CMAKE_CURRENT_SOURCE_DIR}/glew.pc.in" )
-		set( outfile "${CMAKE_CURRENT_BINARY_DIR}/${libname}.pc" )
+		string( TOLOWER "${libname}" pcname )
+		set( outfile "${CMAKE_CURRENT_BINARY_DIR}/${pcname}.pc" )
 		set( prefix "${CMAKE_INSTALL_PREFIX}" )
 		set( version "${GLEW_VERSION}" )
 
