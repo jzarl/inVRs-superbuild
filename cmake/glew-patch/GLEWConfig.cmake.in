@@ -1,4 +1,36 @@
 include( CMakeFindDependencyMacro )
+
 find_dependency( OpenGL )
+# if you make changes on the imported target, make sure to also change it in GlewConfig.cmake.in:
+add_library( GLEW-gl INTERFACE IMPORTED)
+set_property( TARGET GLEW-gl PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${OPENGL_INCLUDE_DIR} )
+set_property( TARGET GLEW-gl PROPERTY INTERFACE_LINK_LIBRARIES ${OPENGL_gl_LIBRARY} )
+
+set( GLEW_USE_GLU @GLEW_USE_GLU@ )
+add_library( GLEW-glu INTERFACE IMPORTED)
+add_library( GLEW-glustatic INTERFACE IMPORTED)
+if( GLEW_USE_GLU )
+	include( FindPkgConfig )
+
+	# find GLU using pkg-config:
+	pkg_check_modules( GLU glu )
+	if ( NOT GLU_FOUND )
+		set( GLEW_FOUND FALSE )
+		set( GLEW_NOTFOUND_MESSAGE "Required library GLU could not be found using pkg-config." )
+	endif()
+
+	# if you make changes on the imported target, make sure to also change it in GlewConfig.cmake.in:
+	set_property( TARGET GLEW-glu GLEW-glustatic PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${GLU_INCLUDE_DIRS} )
+	set_property( TARGET GLEW-glu PROPERTY INTERFACE_LINK_LIBRARIES ${GLU_LIBRARIES} )
+	set_property( TARGET GLEW-glustatic PROPERTY INTERFACE_LINK_LIBRARIES ${GLU_LIBRARIES_STATIC} )
+else()
+	set_property( TARGET GLEW-glu GLEW-glustatic PROPERTY INTERFACE_COMPILE_DEFINITIONS GLEW_NO_GLU)
+endif()
+
+if( NOT WIN32 )
+	find_dependency( X11 )
+	set_property( TARGET GLEW-x11 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${X11_INCLUDE_DIR} )
+	set_property( TARGET GLEW-x11 PROPERTY INTERFACE_LINK_LIBRARIES ${X11_LIBRARIES} )
+endif()
 
 include( "${CMAKE_CURRENT_LIST_DIR}/GLEWTargets.cmake" )
