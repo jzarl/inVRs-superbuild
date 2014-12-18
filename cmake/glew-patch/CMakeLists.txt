@@ -117,6 +117,8 @@ fix_library_name( GLEWmxstatic )
 target_compile_definitions( GLEWmxstatic PUBLIC GLEW_MX PRIVATE GLEW_STATIC GLEW_BUILD )
 target_link_libraries( GLEWmxstatic PUBLIC GLEW-gl GLEW-glustatic ${X11-target} )
 
+set_property( TARGET GLEW GLEWstatic GLEWmx GLEWmxstatic PROPERTY VERSION ${GLEW_VERSION} )
+
 add_executable( glewinfo ${GLEWINFO_SOURCES} )
 target_link_libraries( glewinfo GLEW )
 
