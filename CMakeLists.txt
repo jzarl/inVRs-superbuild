@@ -196,6 +196,7 @@ if( PNG_BUILD )
 			"${DEFAULT_CMAKE_ARGS}"
 		)
 	copy_install_manifest( PNG "${CMAKE_CURRENT_BINARY_DIR}/external/PNG/src/PNG-build/install_manifest.txt" )
+	list( APPEND OpenSG_CMAKE_ARGS "-DPNG_NAMES_RELEASE:STRING=libpng16" "-DPNG_NAMES_DEBUG:STRING=libpng16d" )
 else()
 	# create pseudo-target for ExternalProject_Add depends:
 	add_custom_target( PNG )
