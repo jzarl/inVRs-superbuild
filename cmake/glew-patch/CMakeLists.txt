@@ -28,7 +28,11 @@ if( WIN32 )
 		string( TOLOWER "${target}" name )
 		# windows 32bit has a is named "glew32":
 		string( REPLACE "glew" "glew32" name "${name}" )
+		# archive := .lib
+		# runtime := .dll
+		# shared libraries consist of archive AND runtime on windows
 		set_property( TARGET ${target} PROPERTY ARCHIVE_OUTPUT_NAME ${name} )
+		set_property( TARGET ${target} PROPERTY RUNTIME_OUTPUT_NAME ${name} )
 	endfunction()
 else()
 	function(fix_library_name target )
