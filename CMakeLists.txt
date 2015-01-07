@@ -222,6 +222,7 @@ if( GLEW_BUILD )
 			"${DEFAULT_CMAKE_ARGS}"
 		)
 	copy_install_manifest( GLEW "${CMAKE_CURRENT_BINARY_DIR}/external/GLEW/src/GLEW-build/install_manifest.txt" )
+	list( APPEND OpenSG_CMAKE_ARGS "-DGLEW_NAMES_RELEASE:STRING=glew32" "-DGLEW_NAMES_DEBUG:STRING=glew32d" )
 else()
 	# create pseudo-target for ExternalProject_Add depends:
 	add_custom_target( GLEW )
@@ -240,7 +241,7 @@ endif()
 # TODO: ( JPEG OSGJpegLibSrcDir )
 # TODO: ( LibXML2 OSGLibXml2SrcDir )
 # TODO: ( PCRE OSGPcreSrcDir )
-# ??: ( PNG OSGLibPNGSrcDir )
+# OK: ( PNG OSGLibPNGSrcDir )
 # OK: ( ZLIB OSGZLibSrcDir )
 
 
@@ -257,6 +258,7 @@ list( APPEND OpenSG_CMAKE_ARGS
 	"-DOSGBUILD_TESTS:BOOL=OFF"
 	)
 
+# XXX: STEP_TARGETS is for debugging:
 ExternalProject_Add(
 	OpenSG
 	DEPENDS Boost FreeGLUT GLEW PNG ZLIB
@@ -268,6 +270,7 @@ ExternalProject_Add(
 	CMAKE_ARGS
 		"${DEFAULT_CMAKE_ARGS}"
 		${OpenSG_CMAKE_ARGS}
+	STEP_TARGETS configure
 	)
 copy_install_manifest( OpenSG "${CMAKE_CURRENT_BINARY_DIR}/external/OpenSG/src/OpenSG-build/install_manifest.txt")
 
