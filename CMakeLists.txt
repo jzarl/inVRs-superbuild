@@ -89,6 +89,58 @@ endif()
 
 ############################################################
 ### Qt - only a reminder:
+
+if( WIN32 )
+	# The Qt installer for windows uses the following scheme for the install path:
+	# INSTALL_LOCATION/QT_VERSION/PLATFORM
+	# e.g.:
+	# INSTALL_LOCATION = C:\Qt
+	# QT_VERSION = 5.4
+	# PLATFORM = msvc2013_64
+	# -> C:\Qt\5.4\msvc2013_64
+
+	## get Qt install location:
+	get_filename_component( QT_INSTALL_LOCATION  "[HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Qt;InstallLocation]" ABSOLUTE CACHE )
+	message( STATUS "Qt install path from registry: ${QT_INSTALL_LOCATION}")
+
+	## identify Qt installed versions
+	file( GLOB QT_VERSIONS ${QT_INSTALL_LOCATION}/[4-5].[0-9] )
+	list( SORT QT_VERSIONS )
+	list( REVERSE QT_VERSIONS )
+	message( STATUS "Identified potential Qt versions: ${QT_VERSIONS}" )
+
+	## try to guess the correct platform identifier
+	# if you are not using MSVC, you will definitely have to adjust this
+	if( MSVC )
+		if( CMAKE_CL_64 )
+			set( _COMPILER_BITS _64 )
+		else()
+			set( _COMPILER_BITS )
+		endif()
+	endif()
+	if( MSVC12 )
+		# msvc2013 also identifies as MSVC12
+		set( QT_POTENTIAL_PLATFORMS
+			msvc2013${_COMPILER_BITS}_opengl msvc2013${_COMPILER_BITS}
+			msvc2012${_COMPILER_BITS}_opengl msvc2012${_COMPILER_BITS}
+			)
+	elseif( MSVC14 )
+		set( QT_POTENTIAL_PLATFORMS msvc2014${_COMPILER_BITS}_opengl msvc2014${_COMPILER_BITS} )
+	endif()
+	message( STATUS "Checking the following Qt platforms: ${QT_POTENTIAL_PLATFORMS}" )
+
+	# pick a path from the available ones:
+	find_path( QT_DIR
+		NAMES bin
+		PATHS ${QT_VERSIONS}
+		PATH_SUFFIXES ${QT_POTENTIAL_PLATFORMS}
+		DOC "Qt install directory for the current toolchain."
+		NO_DEFAULT_PATH
+		)
+	message( STATUS "Identified potential Qt candidate directory: ${QT_DIR}" )
+	list( APPEND CMAKE_PREFIX_PATH "${QT_DIR}" )
+endif()
+
 find_package( Qt4 )
 if ( NOT Qt4_FOUND )
 	message( WARNING "Could not find Qt." )
