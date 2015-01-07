@@ -267,6 +267,7 @@ ExternalProject_Add(
 	INSTALL_DIR "${OpenSG_DIR}"
 	${OpenSG_DOWNLOAD}
 	${MAYBE_DISABLE_UPDATE_COMMAND}
+	PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/cmake/opensg-patch/FindGLUT_OpenSG.cmake" <SOURCE_DIR>/CMake/FindGLUT_OpenSG.cmake
 	CMAKE_ARGS
 		"${DEFAULT_CMAKE_ARGS}"
 		${OpenSG_CMAKE_ARGS}
