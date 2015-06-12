@@ -6,15 +6,15 @@ project( inVRs-SuperBuild )
 
 list( APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" )
 
-option( DISABLE_VCS_UPDATES "Do not try to update repositories under VCS (Use this if you don't have a network connection)" OFF )
-if ( DISABLE_VCS_UPDATES )
+option( SUPERBUILD_DISABLE_VCS_UPDATES "Do not try to update repositories under VCS (Use this if you don't have a network connection)" OFF )
+if ( SUPERBUILD_DISABLE_VCS_UPDATES )
 	message( WARNING "Subversion and git repository updates are disabled!" )
 	set( MAYBE_DISABLE_UPDATE_COMMAND UPDATE_COMMAND ${CMAKE_COMMAND} -E echo "NOT updating repository" )
 endif()
-set( DOWNLOAD_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/download" CACHE PATH "Cache directory for downloaded files." )
-mark_as_advanced( DOWNLOAD_CACHE_DIRECTORY )
-set( VCS_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vcs" CACHE PATH "Cache directory for external source code under version control" )
-mark_as_advanced( VCS_CACHE_DIRECTORY )
+set( SUPERBUILD_ "${CMAKE_CURRENT_SOURCE_DIR}/download" CACHE PATH "Cache directory for downloaded files." )
+mark_as_advanced( SUPERBUILD_ )
+set( SUPERBUILD_VCS_CACHE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/vcs" CACHE PATH "Cache directory for external source code under version control" )
+mark_as_advanced( SUPERBUILD_VCS_CACHE_DIRECTORY )
 
 set( DEFAULT_CMAKE_ARGS
 	"-DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}"
@@ -46,16 +46,16 @@ file( GLOB REPOSITORY_COLLECTIONS
 	LIST_DIRECTORIES false
 	RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/repositories"
 	"${CMAKE_CURRENT_SOURCE_DIR}/repositories/*.repositories.cmake" )
-set( REPOSITORY_COLLECTION "default.repositories.cmake" CACHE STRING "Configuration file for repositories." )
-set_property(CACHE REPOSITORY_COLLECTION PROPERTY STRINGS ${REPOSITORY_COLLECTIONS} )
+set( SUPERBUILD_REPOSITORY_COLLECTION "default.repositories.cmake" CACHE STRING "Configuration file for repositories." )
+set_property(CACHE SUPERBUILD_REPOSITORY_COLLECTION PROPERTY STRINGS ${REPOSITORY_COLLECTIONS} )
 
 message( STATUS "Available repository collections:" )
 foreach( coll IN LISTS REPOSITORY_COLLECTIONS )
 	message( STATUS " * ${coll}" )
 endforeach()
-message( STATUS "Using collection: ${REPOSITORY_COLLECTION}" )
+message( STATUS "Using collection: ${SUPERBUILD_REPOSITORY_COLLECTION}" )
 
-include( "${CMAKE_CURRENT_SOURCE_DIR}/repositories/${REPOSITORY_COLLECTION}" )
+include( "${CMAKE_CURRENT_SOURCE_DIR}/repositories/${SUPERBUILD_REPOSITORY_COLLECTION}" )
 ############################################################
 ### Boost
 set( BOOST_REQUIRED_COMPONENTS system filesystem )
@@ -86,7 +86,7 @@ if( Boost_BUILD )
 	ExternalProject_Add(
 		Boost
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/boost"
-		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		DOWNLOAD_DIR "${SUPERBUILD_}"
 		BUILD_IN_SOURCE 1
 		${Boost_DOWNLOAD}
 		UPDATE_COMMAND "${BOOST_BOOTSTRAP_COMMAND}"
@@ -175,7 +175,7 @@ if( GLUT_BUILD )
 	ExternalProject_Add(
 		FreeGLUT
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/FreeGLUT"
-		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		DOWNLOAD_DIR "${SUPERBUILD_}"
 		INSTALL_DIR "${FreeGLUT_DIR}"
 		${FreeGLUT_DOWNLOAD}
 		CMAKE_ARGS
@@ -201,7 +201,7 @@ if( ZLIB_BUILD )
 	ExternalProject_Add(
 		ZLIB
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/ZLIB"
-		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		DOWNLOAD_DIR "${SUPERBUILD_}"
 		INSTALL_DIR "${ZLIB_DIR}"
 		${ZLIB_DOWNLOAD}
 		CMAKE_ARGS
@@ -227,7 +227,7 @@ if( PCRE_BUILD )
 		PCRE
 		DEPENDS ZLIB
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/PCRE"
-		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		DOWNLOAD_DIR "${SUPERBUILD_}"
 		INSTALL_DIR "${PCRE_DIR}"
 		${PCRE_DOWNLOAD}
 		CMAKE_ARGS
@@ -255,7 +255,7 @@ if( PNG_BUILD )
 		PNG
 		DEPENDS ZLIB
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/PNG"
-		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		DOWNLOAD_DIR "${SUPERBUILD_}"
 		INSTALL_DIR "${PNG_DIR}"
 		${PNG_DOWNLOAD}
 		CMAKE_ARGS
@@ -280,7 +280,7 @@ if( GLEW_BUILD )
 	ExternalProject_Add(
 		GLEW
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/GLEW"
-		DOWNLOAD_DIR "${DOWNLOAD_CACHE_DIRECTORY}"
+		DOWNLOAD_DIR "${SUPERBUILD_}"
 		INSTALL_DIR "${GLEW_DIR}"
 		${GLEW_DOWNLOAD}
 		PATCH_COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/cmake/glew-patch/" <SOURCE_DIR>
@@ -329,7 +329,7 @@ ExternalProject_Add(
 	OpenSG
 	DEPENDS Boost FreeGLUT GLEW PNG ZLIB
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/OpenSG"
-	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/OpenSG"
+	SOURCE_DIR "${SUPERBUILD_VCS_CACHE_DIRECTORY}/OpenSG"
 	INSTALL_DIR "${OpenSG_DIR}"
 	${OpenSG_DOWNLOAD}
 	${MAYBE_DISABLE_UPDATE_COMMAND}
@@ -349,7 +349,7 @@ ExternalProject_Add(
 	inVRs
 	DEPENDS OpenSG
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/inVRs"
-	SOURCE_DIR "${VCS_CACHE_DIRECTORY}/inVRs"
+	SOURCE_DIR "${SUPERBUILD_VCS_CACHE_DIRECTORY}/inVRs"
 	${inVRs_DOWNLOAD}
 	${MAYBE_DISABLE_UPDATE_COMMAND}
 	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
