@@ -375,5 +375,5 @@ if( SUPERBUILD_ENABLE_inVRs )
 		INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
 		CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
 		)
-	copy_install_manifest( inVRs "${CMAKE_CURRENT_BINARY_DIR}/inVRs-prefix/src/inVRs-build/install_manifest.txt")
+	copy_install_manifest( inVRs "${CMAKE_CURRENT_BINARY_DIR}/external/inVRs/src/inVRs-build/install_manifest.txt")
 endif()
