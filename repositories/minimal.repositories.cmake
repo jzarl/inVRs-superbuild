@@ -30,6 +30,11 @@ set( PNG_DOWNLOAD
 	URL_HASH "MD5=829a256f3de9307731d4f52dc071916d"
 	)
 
+set( VRPN_DOWNLOAD
+	URL "http://github.com/vrpn/vrpn/releases/download/v07.33/vrpn_07_33.zip"
+	URL_HASH "SHA1=3c908c333e501aeb5051484fafbb89e79064ba20"
+	)
+
 set( SUPERBUILD_ENABLE_PCRE OFF CACHE FORCE "Disabled by repository collection setup." )
 set( SUPERBUILD_ENABLE_QT OFF CACHE FORCE "Disabled by repository collection setup." )
 set( SUPERBUILD_ENABLE_ZLIB OFF CACHE FORCE "Disabled by repository collection setup." )

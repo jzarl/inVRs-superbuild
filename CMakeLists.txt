@@ -167,6 +167,7 @@ if( SUPERBUILD_ENABLE_QT )
 	else()
 		message( STATUS "Qt4 found." )
 		list( APPEND OpenSG_OPTIONAL_DEPENDENCIES Qt4 )
+		list( APPEND inVRs_OPTIONAL_DEPENDENCIES Qt4 )
 	endif()
 
 endif()
@@ -193,6 +194,33 @@ if( GLUT_BUILD )
 	list( APPEND OpenSG_OPTIONAL_DEPENDENCIES FreeGLUT )
 else()
 	message( STATUS "Using already installed GLUT." )
+endif()
+
+
+############################################################
+### VRPN
+
+# this can be overridden in repositories/*
+option( SUPERBUILD_ENABLE_VRPN "Build with VRPN." ON)
+if( SUPERBUILD_ENABLE_VRPN )
+	conditional_find_package( VRPN )
+	if( VRPN_BUILD )
+		message( STATUS "Building VRPN from source." )
+		set( VRPN_DIR "${CMAKE_INSTALL_PREFIX}" )
+		ExternalProject_Add(
+			VRPN
+			PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/VRPN"
+			DOWNLOAD_DIR "${SUPERBUILD_}"
+			INSTALL_DIR "${VRPN_DIR}"
+			${VRPN_DOWNLOAD}
+			CMAKE_ARGS
+				"${DEFAULT_CMAKE_ARGS}"
+			)
+		copy_install_manifest( VRPN "${CMAKE_CURRENT_BINARY_DIR}/external/VRPN/src/VRPN-build/install_manifest.txt")
+		list( APPEND inVRs_OPTIONAL_DEPENDENCIES VRPN )
+	else()
+		message( STATUS "Using already installed VRPN." )
+	endif()
 endif()
 
 
@@ -367,7 +395,7 @@ option( SUPERBUILD_ENABLE_inVRs "Build with inVRs. Turning this off can be a nic
 if( SUPERBUILD_ENABLE_inVRs )
 	ExternalProject_Add(
 		inVRs
-		DEPENDS OpenSG
+		DEPENDS OpenSG ${inVRs_OPTIONAL_DEPENDENCIES}
 		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/inVRs"
 		SOURCE_DIR "${SUPERBUILD_VCS_CACHE_DIRECTORY}/inVRs"
 		${inVRs_DOWNLOAD}
