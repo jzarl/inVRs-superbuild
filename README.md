@@ -52,6 +52,23 @@ To verify a working set of programs, you should be able to run ``cmake``, ``git`
  5. *Variant B:* Build in Visual Studio:
     Open the Visual Studio Solution ``%BUILDDIR%\inVRs-superbuild.sln`` in Microsoft Visual Studio and build it.
 
+## General build notes
+
+### Building without network connection
+
+You will need a network connection the first time you run cmake, so that the ``SUPERBUILD_DOWNLOAD_CACHE_DIRECTORY`` and ``SUPERBUILD_VCS_CACHE_DIRECTORY`` subdirectories can be populated.
+Afterwards, you can enable ``SUPERBUILD_DISABLE_VCS_UPDATES`` in your cmake cache, so that the git and subversion update steps are skipped.
+
+### Changing the set of repositories
+
+The repositories that are built by the superbuild are defined in ``repositories/default.repositories.cmake``.
+If you want to modify the selected package versions or locations, you can create a file ``repositories/SOMENAME.repositories.cmake``
+and select the right value for ``SUPERBUILD_REPOSITORY_COLLECTION`` in the cmake cache.
+
+### CMake cache variables that influence the build
+
+Generally, inVRs-SuperBuild cache variables are prefixed with ``SUPERBUILD_`` so that you can easily distinguish them from other variables.
+
 ## Further Information
 
 For more information on inVRs, check out http://inVRs.org
