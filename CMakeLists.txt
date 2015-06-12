@@ -38,10 +38,24 @@ endif()
 
 include( ExternalProject )
 include( FindPkgConfig )
-include( "${CMAKE_CURRENT_SOURCE_DIR}/repositories.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/HelperFunctions.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/UninstallTarget.cmake" )
 
+### Repository selection
+file( GLOB REPOSITORY_COLLECTIONS
+	LIST_DIRECTORIES false
+	RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/repositories"
+	"${CMAKE_CURRENT_SOURCE_DIR}/repositories/*.repositories.cmake" )
+set( REPOSITORY_COLLECTION "default.repositories.cmake" CACHE STRING "Configuration file for repositories." )
+set_property(CACHE REPOSITORY_COLLECTION PROPERTY STRINGS ${REPOSITORY_COLLECTIONS} )
+
+message( STATUS "Available repository collections:" )
+foreach( coll IN LISTS REPOSITORY_COLLECTIONS )
+	message( STATUS " * ${coll}" )
+endforeach()
+message( STATUS "Using collection: ${REPOSITORY_COLLECTION}" )
+
+include( "${CMAKE_CURRENT_SOURCE_DIR}/repositories/${REPOSITORY_COLLECTION}" )
 ############################################################
 ### Boost
 set( BOOST_REQUIRED_COMPONENTS system filesystem )
