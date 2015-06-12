@@ -38,6 +38,7 @@ endif()
 
 include( ExternalProject )
 include( FindPkgConfig )
+include( CMakeDependentOption )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/HelperFunctions.cmake" )
 include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake/UninstallTarget.cmake" )
 
@@ -46,7 +47,7 @@ file( GLOB REPOSITORY_COLLECTIONS
 	LIST_DIRECTORIES false
 	RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/repositories"
 	"${CMAKE_CURRENT_SOURCE_DIR}/repositories/*.repositories.cmake" )
-set( SUPERBUILD_REPOSITORY_COLLECTION "default.repositories.cmake" CACHE STRING "Configuration file for repositories." )
+set( SUPERBUILD_REPOSITORY_COLLECTION "minimal.repositories.cmake" CACHE STRING "Configuration file for repositories." )
 set_property(CACHE SUPERBUILD_REPOSITORY_COLLECTION PROPERTY STRINGS ${REPOSITORY_COLLECTIONS} )
 
 message( STATUS "Available repository collections:" )
@@ -104,66 +105,71 @@ endif()
 ############################################################
 ### Qt - only a reminder:
 
-if( WIN32 )
-	# The Qt installer for windows uses the following scheme for the install path:
-	# INSTALL_LOCATION/QT_VERSION/PLATFORM
-	# e.g.:
-	# INSTALL_LOCATION = C:\Qt
-	# QT_VERSION = 5.4
-	# PLATFORM = msvc2013_64
-	# -> C:\Qt\5.4\msvc2013_64
+# this can be overridden in repositories/*
+option( SUPERBUILD_ENABLE_QT "Build with Qt." ON)
+if( SUPERBUILD_ENABLE_QT )
+	if( WIN32 )
+		# The Qt installer for windows uses the following scheme for the install path:
+		# INSTALL_LOCATION/QT_VERSION/PLATFORM
+		# e.g.:
+		# INSTALL_LOCATION = C:\Qt
+		# QT_VERSION = 5.4
+		# PLATFORM = msvc2013_64
+		# -> C:\Qt\5.4\msvc2013_64
 
-	## get Qt install location:
-	get_filename_component( QT_INSTALL_LOCATION  "[HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Qt;InstallLocation]" ABSOLUTE CACHE )
-	message( STATUS "Qt install path from registry: ${QT_INSTALL_LOCATION}")
+		## get Qt install location:
+		get_filename_component( QT_INSTALL_LOCATION  "[HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Qt;InstallLocation]" ABSOLUTE CACHE )
+		message( STATUS "Qt install path from registry: ${QT_INSTALL_LOCATION}")
 
-	## identify Qt installed versions
-	file( GLOB QT_VERSIONS ${QT_INSTALL_LOCATION}/[4-5].[0-9] )
-	list( SORT QT_VERSIONS )
-	list( REVERSE QT_VERSIONS )
-	message( STATUS "Identified potential Qt versions: ${QT_VERSIONS}" )
+		## identify Qt installed versions
+		file( GLOB QT_VERSIONS ${QT_INSTALL_LOCATION}/[4-5].[0-9] )
+		list( SORT QT_VERSIONS )
+		list( REVERSE QT_VERSIONS )
+		message( STATUS "Identified potential Qt versions: ${QT_VERSIONS}" )
 
-	## try to guess the correct platform identifier
-	# if you are not using MSVC, you will definitely have to adjust this
-	if( MSVC )
-		if( CMAKE_CL_64 )
-			set( _COMPILER_BITS _64 )
-		else()
-			set( _COMPILER_BITS )
+		## try to guess the correct platform identifier
+		# if you are not using MSVC, you will definitely have to adjust this
+		if( MSVC )
+			if( CMAKE_CL_64 )
+				set( _COMPILER_BITS _64 )
+			else()
+				set( _COMPILER_BITS )
+			endif()
 		endif()
-	endif()
-	if( MSVC12 )
-		# msvc2013 also identifies as MSVC12
-		set( QT_POTENTIAL_PLATFORMS
-			msvc2013${_COMPILER_BITS}_opengl msvc2013${_COMPILER_BITS}
-			msvc2012${_COMPILER_BITS}_opengl msvc2012${_COMPILER_BITS}
+		if( MSVC12 )
+			# msvc2013 also identifies as MSVC12
+			set( QT_POTENTIAL_PLATFORMS
+				msvc2013${_COMPILER_BITS}_opengl msvc2013${_COMPILER_BITS}
+				msvc2012${_COMPILER_BITS}_opengl msvc2012${_COMPILER_BITS}
+				)
+		elseif( MSVC14 )
+			set( QT_POTENTIAL_PLATFORMS msvc2014${_COMPILER_BITS}_opengl msvc2014${_COMPILER_BITS} )
+		endif()
+		message( STATUS "Checking the following Qt platforms: ${QT_POTENTIAL_PLATFORMS}" )
+
+		# pick a path from the available ones:
+		find_path( QT_DIR
+			NAMES bin
+			PATHS ${QT_VERSIONS}
+			PATH_SUFFIXES ${QT_POTENTIAL_PLATFORMS}
+			DOC "Qt install directory for the current toolchain."
+			NO_DEFAULT_PATH
 			)
-	elseif( MSVC14 )
-		set( QT_POTENTIAL_PLATFORMS msvc2014${_COMPILER_BITS}_opengl msvc2014${_COMPILER_BITS} )
+		message( STATUS "Identified potential Qt candidate directory: ${QT_DIR}" )
+		list( APPEND CMAKE_PREFIX_PATH "${QT_DIR}" )
 	endif()
-	message( STATUS "Checking the following Qt platforms: ${QT_POTENTIAL_PLATFORMS}" )
 
-	# pick a path from the available ones:
-	find_path( QT_DIR
-		NAMES bin
-		PATHS ${QT_VERSIONS}
-		PATH_SUFFIXES ${QT_POTENTIAL_PLATFORMS}
-		DOC "Qt install directory for the current toolchain."
-		NO_DEFAULT_PATH
-		)
-	message( STATUS "Identified potential Qt candidate directory: ${QT_DIR}" )
-	list( APPEND CMAKE_PREFIX_PATH "${QT_DIR}" )
+	find_package( Qt4 )
+	if ( NOT Qt4_FOUND )
+		message( WARNING "Could not find Qt." )
+		#message( STATUS "If you want to use Qt, get the installer from http://www.qt.io/download-open-source/" )
+		#message( STATUS "If you already installed Qt, you should also set the environment variable CMAKE_PREFIX_PATH appropriately." )
+	else()
+		message( STATUS "Qt4 found." )
+		list( APPEND OpenSG_OPTIONAL_DEPENDENCIES Qt4 )
+	endif()
+
 endif()
-
-find_package( Qt4 )
-if ( NOT Qt4_FOUND )
-	message( WARNING "Could not find Qt." )
-	#message( STATUS "If you want to use Qt, get the installer from http://www.qt.io/download-open-source/" )
-	#message( STATUS "If you already installed Qt, you should also set the environment variable CMAKE_PREFIX_PATH appropriately." )
-else()
-	message( STATUS "Qt4 found." )
-endif()
-
 
 ############################################################
 ### FreeGLUT
@@ -184,9 +190,8 @@ if( GLUT_BUILD )
 			"-DINSTALL_PDB:BOOL=OFF"
 		)
 	copy_install_manifest( FreeGLUT "${CMAKE_CURRENT_BINARY_DIR}/external/FreeGLUT/src/FreeGLUT-build/install_manifest.txt")
+	list( APPEND OpenSG_OPTIONAL_DEPENDENCIES FreeGLUT )
 else()
-	# create pseudo-target for ExternalProject_Add depends:
-	add_custom_target( FreeGLUT )
 	message( STATUS "Using already installed GLUT." )
 endif()
 
@@ -194,24 +199,27 @@ endif()
 ############################################################
 ### ZLIB
 
-conditional_find_package( ZLIB )
-if( ZLIB_BUILD )
-	message( STATUS "Building ZLIB from source." )
-	set( ZLIB_DIR "${CMAKE_INSTALL_PREFIX}" )
-	ExternalProject_Add(
-		ZLIB
-		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/ZLIB"
-		DOWNLOAD_DIR "${SUPERBUILD_}"
-		INSTALL_DIR "${ZLIB_DIR}"
-		${ZLIB_DOWNLOAD}
-		CMAKE_ARGS
-			"${DEFAULT_CMAKE_ARGS}"
-		)
-	copy_install_manifest( ZLIB "${CMAKE_CURRENT_BINARY_DIR}/external/ZLIB/src/ZLIB-build/install_manifest.txt")
-else()
-	# create pseudo-target for ExternalProject_Add depends:
-	add_custom_target( ZLIB )
-	message( STATUS "Using already installed ZLIB." )
+# this can be overridden in repositories/*
+option( SUPERBUILD_ENABLE_ZLIB "Build with ZLIB (required for PCRE, PNG)." ON)
+if( SUPERBUILD_ENABLE_ZLIB )
+	conditional_find_package( ZLIB )
+	if( ZLIB_BUILD )
+		message( STATUS "Building ZLIB from source." )
+		set( ZLIB_DIR "${CMAKE_INSTALL_PREFIX}" )
+		ExternalProject_Add(
+			ZLIB
+			PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/ZLIB"
+			DOWNLOAD_DIR "${SUPERBUILD_}"
+			INSTALL_DIR "${ZLIB_DIR}"
+			${ZLIB_DOWNLOAD}
+			CMAKE_ARGS
+				"${DEFAULT_CMAKE_ARGS}"
+			)
+		copy_install_manifest( ZLIB "${CMAKE_CURRENT_BINARY_DIR}/external/ZLIB/src/ZLIB-build/install_manifest.txt")
+		list( APPEND OpenSG_OPTIONAL_DEPENDENCIES ZLIB )
+	else()
+		message( STATUS "Using already installed ZLIB." )
+	endif()
 endif()
 
 
@@ -219,54 +227,63 @@ endif()
 ### PCRE
 # project PCRE in OSGSupport is outdated, and PCRE now supports cmake:
 
-conditional_pkg_check_modules( PCRE libpcrecpp )
-if( PCRE_BUILD )
-	message( STATUS "Building PCRE from source." )
-	set( PCRE_DIR "${CMAKE_INSTALL_PREFIX}" )
-	ExternalProject_Add(
-		PCRE
-		DEPENDS ZLIB
-		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/PCRE"
-		DOWNLOAD_DIR "${SUPERBUILD_}"
-		INSTALL_DIR "${PCRE_DIR}"
-		${PCRE_DOWNLOAD}
-		CMAKE_ARGS
-			"${DEFAULT_CMAKE_ARGS}"
-			"-DPCRE_BUILD_PCRE16:BOOL=ON"
-			"-DPCRE_BUILD_PCRE32:BOOL=ON"
-			"-DPCRE_SUPPORT_JIT:BOOL=ON"
-			"-DPCRE_SUPPORT_UTF:BOOL=ON"
-		)
-	copy_install_manifest( PCRE "${CMAKE_CURRENT_BINARY_DIR}/external/PCRE/src/PCRE-build/install_manifest.txt")
-else()
-	# create pseudo-target for ExternalProject_Add depends:
-	add_custom_target( PCRE )
-	message( STATUS "Using already installed PCRE." )
+# this can be overridden in repositories/*
+cmake_dependent_option(
+	SUPERBUILD_ENABLE_PCRE "Build with PCRE." ON
+	"SUPERBUILD_ENABLE_ZLIB" OFF )
+if( SUPERBUILD_ENABLE_PCRE )
+	conditional_pkg_check_modules( PCRE libpcrecpp )
+	if( PCRE_BUILD )
+		message( STATUS "Building PCRE from source." )
+		set( PCRE_DIR "${CMAKE_INSTALL_PREFIX}" )
+		ExternalProject_Add(
+			PCRE
+			DEPENDS ZLIB
+			PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/PCRE"
+			DOWNLOAD_DIR "${SUPERBUILD_}"
+			INSTALL_DIR "${PCRE_DIR}"
+			${PCRE_DOWNLOAD}
+			CMAKE_ARGS
+				"${DEFAULT_CMAKE_ARGS}"
+				"-DPCRE_BUILD_PCRE16:BOOL=ON"
+				"-DPCRE_BUILD_PCRE32:BOOL=ON"
+				"-DPCRE_SUPPORT_JIT:BOOL=ON"
+				"-DPCRE_SUPPORT_UTF:BOOL=ON"
+			)
+		copy_install_manifest( PCRE "${CMAKE_CURRENT_BINARY_DIR}/external/PCRE/src/PCRE-build/install_manifest.txt")
+	else()
+		message( STATUS "Using already installed PCRE." )
+	endif()
 endif()
 
 ############################################################
 ### PNG
 
-conditional_find_package( PNG )
-if( PNG_BUILD )
-	message( STATUS "Building PNG from source." )
-	set( PNG_DIR "${CMAKE_INSTALL_PREFIX}" )
-	ExternalProject_Add(
-		PNG
-		DEPENDS ZLIB
-		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/PNG"
-		DOWNLOAD_DIR "${SUPERBUILD_}"
-		INSTALL_DIR "${PNG_DIR}"
-		${PNG_DOWNLOAD}
-		CMAKE_ARGS
-			"${DEFAULT_CMAKE_ARGS}"
-		)
-	copy_install_manifest( PNG "${CMAKE_CURRENT_BINARY_DIR}/external/PNG/src/PNG-build/install_manifest.txt" )
-	list( APPEND OpenSG_CMAKE_ARGS "-DPNG_NAMES_RELEASE:STRING=libpng16" "-DPNG_NAMES_DEBUG:STRING=libpng16d" )
-else()
-	# create pseudo-target for ExternalProject_Add depends:
-	add_custom_target( PNG )
-	message( STATUS "Using already installed PNG." )
+# this can be overridden in repositories/*
+cmake_dependent_option(
+	SUPERBUILD_ENABLE_PNG "Build with PNG." ON
+	"SUPERBUILD_ENABLE_ZLIB" OFF )
+if( SUPERBUILD_ENABLE_PNG )
+	conditional_find_package( PNG )
+	if( PNG_BUILD )
+		message( STATUS "Building PNG from source." )
+		set( PNG_DIR "${CMAKE_INSTALL_PREFIX}" )
+		ExternalProject_Add(
+			PNG
+			DEPENDS ZLIB
+			PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/PNG"
+			DOWNLOAD_DIR "${SUPERBUILD_}"
+			INSTALL_DIR "${PNG_DIR}"
+			${PNG_DOWNLOAD}
+			CMAKE_ARGS
+				"${DEFAULT_CMAKE_ARGS}"
+			)
+		copy_install_manifest( PNG "${CMAKE_CURRENT_BINARY_DIR}/external/PNG/src/PNG-build/install_manifest.txt" )
+		list( APPEND OpenSG_CMAKE_ARGS "-DPNG_NAMES_RELEASE:STRING=libpng16" "-DPNG_NAMES_DEBUG:STRING=libpng16d" )
+		list( APPEND OpenSG_OPTIONAL_DEPENDENCIES PNG )
+	else()
+		message( STATUS "Using already installed PNG." )
+	endif()
 endif()
 
 
@@ -289,9 +306,8 @@ if( GLEW_BUILD )
 		)
 	copy_install_manifest( GLEW "${CMAKE_CURRENT_BINARY_DIR}/external/GLEW/src/GLEW-build/install_manifest.txt" )
 	list( APPEND OpenSG_CMAKE_ARGS "-DGLEW_NAMES_RELEASE:STRING=glew32" "-DGLEW_NAMES_DEBUG:STRING=glew32d" )
+	list( APPEND OpenSG_OPTIONAL_DEPENDENCIES GLEW )
 else()
-	# create pseudo-target for ExternalProject_Add depends:
-	add_custom_target( GLEW )
 	message( STATUS "Using already installed GLEW." )
 endif()
 
@@ -327,7 +343,7 @@ list( APPEND OpenSG_CMAKE_ARGS
 # XXX: STEP_TARGETS is for debugging:
 ExternalProject_Add(
 	OpenSG
-	DEPENDS Boost FreeGLUT GLEW PNG ZLIB
+	DEPENDS Boost ${OpenSG_OPTIONAL_DEPENDENCIES}
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/OpenSG"
 	SOURCE_DIR "${SUPERBUILD_VCS_CACHE_DIRECTORY}/OpenSG"
 	INSTALL_DIR "${OpenSG_DIR}"
@@ -345,14 +361,19 @@ copy_install_manifest( OpenSG "${CMAKE_CURRENT_BINARY_DIR}/external/OpenSG/src/O
 
 ############################################################
 ### inVRs
-ExternalProject_Add(
-	inVRs
-	DEPENDS OpenSG
-	PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/inVRs"
-	SOURCE_DIR "${SUPERBUILD_VCS_CACHE_DIRECTORY}/inVRs"
-	${inVRs_DOWNLOAD}
-	${MAYBE_DISABLE_UPDATE_COMMAND}
-	INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
-	CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
-	)
-copy_install_manifest( inVRs "${CMAKE_CURRENT_BINARY_DIR}/inVRs-prefix/src/inVRs-build/install_manifest.txt")
+
+# this can be overridden in repositories/*
+option( SUPERBUILD_ENABLE_inVRs "Build with inVRs. Turning this off can be a nice way to get a full OpenSG stack only." ON)
+if( SUPERBUILD_ENABLE_inVRs )
+	ExternalProject_Add(
+		inVRs
+		DEPENDS OpenSG
+		PREFIX "${CMAKE_CURRENT_BINARY_DIR}/external/inVRs"
+		SOURCE_DIR "${SUPERBUILD_VCS_CACHE_DIRECTORY}/inVRs"
+		${inVRs_DOWNLOAD}
+		${MAYBE_DISABLE_UPDATE_COMMAND}
+		INSTALL_DIR "${CMAKE_INSTALL_PREFIX}"
+		CMAKE_ARGS "${DEFAULT_CMAKE_ARGS}" "-DBOOST_ROOT:PATH=${BOOST_ROOT}" "-DOpenSG_DIR:PATH=${OpenSG_DIR}"
+		)
+	copy_install_manifest( inVRs "${CMAKE_CURRENT_BINARY_DIR}/inVRs-prefix/src/inVRs-build/install_manifest.txt")
+endif()
