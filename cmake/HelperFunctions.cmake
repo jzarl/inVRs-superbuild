@@ -26,7 +26,7 @@ function( conditional_find_package PKG )
 		set( _REQUIRED "REQUIRED" )
 	endif()
 
-	find_package( ${PKG} ${ARGN} ${_REQUIRED} QUIET NO_CMAKE_PACKAGE_REGISTRY )
+	find_package( ${PKG} ${ARGN} ${_REQUIRED} QUIET )
 	if( ${PKG}_FOUND )
 		message( STATUS "Package ${PKG} is already installed. Not building it..." )
 		set( ${PKG}_BUILD false PARENT_SCOPE)
